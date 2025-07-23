@@ -1,0 +1,270 @@
+<?php
+require_once 'includes/functions.php';
+
+$courses = getCourses();
+$error = isset($_GET['error']) ? $_GET['error'] : '';
+$success = isset($_GET['success']) ? $_GET['success'] : '';
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Dear 63_D</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div class="user-info">
+            <div class="user-avatar">
+                <?php if (isLoggedIn()): ?>
+                    <?php echo strtoupper(substr($_SESSION['name'], 0, 1)); ?>
+                <?php else: ?>
+                    <i class="bi bi-person"></i>
+                <?php endif; ?>
+            </div>
+            <div>
+                <?php if (isLoggedIn()): ?>
+                    <h5 class="mb-0"><?php echo htmlspecialchars($_SESSION['name']); ?></h5>
+                    <small class="text-muted"><?php echo isCR() ? 'Class Representative' : 'Student'; ?></small>
+                <?php else: ?>
+                    <h5 class="mb-0">Welcome</h5>
+                    <small class="text-muted">Browse Courses</small>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop Sidebar -->
+    <div class="d-none d-md-block col-md-3 col-lg-2 px-0 sidebar">
+        <div class="p-3">
+            <h4 class="text-center mb-4">Dear 63_D</h4>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="dashboard.php">
+                        <i class="bi bi-house-door"></i> Home
+                    </a>
+                </li>
+                <?php if (isLoggedIn() && isCR()): ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="create_course.php">
+                        <i class="bi bi-plus-circle"></i> Create Course
+                    </a>
+                </li>
+                <?php endif; ?>
+                <?php if (isLoggedIn()): ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="profile.php">
+                        <i class="bi bi-person"></i> Profile
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="logout.php">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </li>
+                <?php else: ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="login.php">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </a>
+                </li>
+                <?php endif; ?>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container-fluid py-4">
+            <?php if ($error): ?>
+            <div class="alert alert-danger d-flex align-items-center">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                <div><?php echo htmlspecialchars($error); ?></div>
+            </div>
+            <?php endif; ?>
+
+            <?php if ($success): ?>
+            <div class="alert alert-success d-flex align-items-center">
+                <i class="bi bi-check-circle me-2"></i>
+                <div><?php echo htmlspecialchars($success); ?></div>
+            </div>
+            <?php endif; ?>
+
+            <div class="row">
+                <div class="col-12 mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-0">
+                                <?php if (isLoggedIn() && isset($_SESSION['name'])): ?>
+                                    Welcome, <?php echo htmlspecialchars($_SESSION['name']); ?>
+                                <?php else: ?>
+                                    Welcome to Dear 63_D
+                                <?php endif; ?>
+                            </h4>
+                            <p class="text-muted mb-0">
+                                <?php if (isLoggedIn()): ?>
+                                    Here's an overview of your courses
+                                <?php else: ?>
+                                    Browse our available courses
+                                <?php endif; ?>
+                            </p>
+                        </div>
+                        <?php if (isLoggedIn() && isCR()): ?>
+                        <a href="create_course.php" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Create New Course
+                        </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <?php if (isLoggedIn()): ?>
+                                    Here's an overview of your courses
+                                <?php else: ?>
+                                    Available Courses
+                                <?php endif; ?>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <?php if (empty($courses)): ?>
+                            <div class="alert alert-info d-flex align-items-center">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <div>No courses available yet.</div>
+                            </div>
+                            <?php else: ?>
+                            <div class="row">
+                                <?php foreach ($courses as $course): ?>
+                                <div class="col-12 col-md-6 col-lg-4 mb-4">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><?php echo htmlspecialchars($course['name']); ?></h5>
+                                            <p class="text-muted mb-2"><?php echo htmlspecialchars($course['course_code']); ?></p>
+                                            <p class="card-text"><?php echo htmlspecialchars($course['description']); ?></p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge bg-primary"><?php echo htmlspecialchars($course['semester']); ?></span>
+                                                <div class="d-flex gap-2">
+                                                    <a href="course.php?id=<?php echo $course['id']; ?>" class="btn btn-outline-primary btn-sm text-nowrap">View Course</a>
+                                                    <?php if (isLoggedIn() && isCR()): ?>
+                                                    <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#deleteCourseModal"
+                                                            data-course-id="<?php echo $course['id']; ?>"
+                                                            data-course-name="<?php echo htmlspecialchars($course['name']); ?>">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation for Mobile -->
+    <nav class="bottom-nav">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <a href="dashboard.php" class="nav-link active">
+                        <i class="bi bi-house-door"></i>
+                        <span>Home</span>
+                    </a>
+                </div>
+                <?php if (isLoggedIn() && isCR()): ?>
+                <div class="col">
+                    <a href="create_course.php" class="nav-link">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>Create</span>
+                    </a>
+                </div>
+                <?php endif; ?>
+                <?php if (isLoggedIn()): ?>
+                <div class="col">
+                    <a href="profile.php" class="nav-link">
+                        <i class="bi bi-person"></i>
+                        <span>Profile</span>
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="logout.php" class="nav-link">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+                <?php else: ?>
+                <div class="col">
+                    <a href="login.php" class="nav-link">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        <span>Login</span>
+                    </a>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Add Delete Course Modal -->
+    <?php if (isLoggedIn() && isCR()): ?>
+    <div class="modal fade" id="deleteCourseModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Course</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Warning: This will delete the course and all its sections and materials!
+                    </div>
+                    <p>Are you sure you want to delete this course?</p>
+                    <p class="text-danger" id="deleteCourseName"></p>
+                    <p class="text-muted">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form action="delete_course.php" method="POST" class="d-inline">
+                        <input type="hidden" name="course_id" id="deleteCourseId">
+                        <button type="submit" class="btn btn-danger">Delete Course</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Delete Course Modal Handler
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteCourseModal = document.getElementById('deleteCourseModal');
+        if (deleteCourseModal) {
+            deleteCourseModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const courseId = button.getAttribute('data-course-id');
+                const courseName = button.getAttribute('data-course-name');
+                
+                document.getElementById('deleteCourseId').value = courseId;
+                document.getElementById('deleteCourseName').textContent = courseName;
+            });
+        }
+    });
+    </script>
+</body>
+</html> 
